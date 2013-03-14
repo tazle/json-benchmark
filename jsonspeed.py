@@ -1,10 +1,19 @@
-import ujson
-import json
-import simplejson
-from collections import defaultdict
 import sys
 import time
 import os
+
+def usage():
+    print "Usage: env/bin/python jsonspeed.py <directory-with-json-files>"
+
+try:
+    import ujson
+    import simplejson
+except ImportError, e:
+    usage()
+    sys.exit(1)
+
+import json
+from collections import defaultdict
 
 def test(directory, jsonmodule):
     counts = defaultdict(lambda: 0)
@@ -22,10 +31,15 @@ def test(directory, jsonmodule):
                     counts[k] += len(data[k])
     return counts
 
+
 def main():
     for module in [ujson, json, simplejson]:
         start = time.time()
-        result = test(sys.argv[1], module)
+        try:
+            result = test(sys.argv[1], module)
+        except IndexError, e:
+            usage()
+            sys.exit(1)
         end = time.time()
         dur = end-start
         print module, result['byte'], result['file'], dur, result['byte']/dur
